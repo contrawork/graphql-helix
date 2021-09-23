@@ -5,6 +5,12 @@ import {
   GraphQLSchema,
   OperationDefinitionNode,
   ValidationRule,
+  ExecutionArgs,
+  execute,
+  parse,
+  subscribe,
+  SubscriptionArgs,
+  validate,
 } from "graphql";
 
 export interface ExecutionPatchResult<
@@ -82,7 +88,16 @@ export interface ProcessRequestOptions<TContext, TRootValue> {
   /**
    * An optional function which will be used to execute instead of default `execute` from `graphql-js`.
    */
-  execute?: (...args: any[]) => any;
+  execute(
+    schema: ExecutionArgs["schema"],
+    document: ExecutionArgs["document"],
+    rootValue?: ExecutionArgs["rootValue"],
+    contextValue?: ExecutionArgs["contextValue"],
+    variableValues?: ExecutionArgs["variableValues"],
+    operationName?: ExecutionArgs["operationName"],
+    fieldResolver?: ExecutionArgs["fieldResolver"],
+    typeResolver?: ExecutionArgs["typeResolver"]
+  ): ReturnType<typeof execute>;
   /**
    * An optional function that can be used to transform every payload (i.e. the `data` object and `errors` array) that's
    * emitted by `processRequest`.
@@ -95,7 +110,10 @@ export interface ProcessRequestOptions<TContext, TRootValue> {
   /**
    * An optional function which will be used to create a document instead of the default `parse` from `graphql-js`.
    */
-  parse?: (...args: any[]) => any;
+  parse?: (
+    source: Parameters<typeof parse>[0],
+    options?: Parameters<typeof parse>[1]
+  ) => ReturnType<typeof parse>;
   /**
    * A Document containing GraphQL Operations and Fragments to execute.
    */
@@ -117,11 +135,26 @@ export interface ProcessRequestOptions<TContext, TRootValue> {
   /**
    * An optional function which will be used to subscribe instead of default `subscribe` from `graphql-js`.
    */
-  subscribe?: (...args: any[]) => any;
+  subscribe?: (
+    schema: SubscriptionArgs["schema"],
+    document: SubscriptionArgs["document"],
+    rootValue?: SubscriptionArgs["rootValue"],
+    contextValue?: SubscriptionArgs["contextValue"],
+    variableValues?: SubscriptionArgs["variableValues"],
+    operationName?: SubscriptionArgs["operationName"],
+    fieldResolver?: SubscriptionArgs["fieldResolver"],
+    subscribeFieldResolver?: SubscriptionArgs["subscribeFieldResolver"]
+  ) => ReturnType<typeof subscribe>;
   /**
    * An optional function which will be used to validate instead of default `validate` from `graphql-js`.
    */
-  validate?: (...args: any[]) => any;
+  validate?: (
+    schema: Parameters<typeof validate>[0], 
+    documentAST: Parameters<typeof validate>[1],
+    rules?: Parameters<typeof validate>[2],
+    typeInfo?: Parameters<typeof validate>[3],
+    options?: Parameters<typeof validate>[4]
+  ) => ReturnType<typeof validate>;
   /**
    * An optional array of validation rules that will be applied to the document
    * in place of those defined by the GraphQL specification.
